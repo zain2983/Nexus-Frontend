@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import Input from './ui/Input';
 import Button from './ui/Button';
-import { signup } from '../api/auth';
+import { signup, login as loginApi } from '../api/auth';
+import { login } from '../store/userSlice';
 
 interface AuthFormProps {
   isLogin: boolean;
   onToggle: () => void;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ isLogin, onToggle }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -33,7 +36,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin, onToggle }) => {
     if (!isLogin) {
       setLoading(true);
       try {
-        await signup(formData.name, formData.password);
+        await signup(formData.name, formData.email, formData.password);
+        dispatch(login(formData.name)); // Store username on signup
         navigate('/success');
       } catch (err: any) {
         setError(err.message);
@@ -41,8 +45,24 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin, onToggle }) => {
         setLoading(false);
       }
     } else {
-      // ...login logic here if needed...
-      navigate('/success');
+      setLoading(true);
+      try {
+        const res = await loginApi(formData.email, formData.password); // res now contains username
+        dispatch(login(res.username)); // Store username from backend response
+        navigate('/success');
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleToggle = () => {
+    if (isLogin) {
+      navigate('/auth/signup');
+    } else {
+      navigate('/auth/login');
     }
   };
 
@@ -92,7 +112,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin, onToggle }) => {
       <p className="text-center mt-6 text-sm text-gray-400">
         {isLogin ? "Don't have an account?" : 'Already have an account?'}
         <button
-          onClick={onToggle}
+          onClick={handleToggle}
           className="ml-1 text-blue-400 hover:text-blue-300 hover:underline transition-colors"
         >
           {isLogin ? 'Sign up' : 'Login'}
