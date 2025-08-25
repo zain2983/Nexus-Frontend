@@ -1,10 +1,10 @@
 // API utility for authentication
 
-// const BASE_URL = 'http://localhost:8000'
-const BASE_URL = 'https://nexus-backend-bye3.onrender.com';
+import { BACKEND_URL } from '../config';
+
 
 export async function signup(username: string, email: string, password: string) {
-  const res = await fetch(`${BASE_URL}/api/users/signup/`, {
+  const res = await fetch(`${BACKEND_URL}/api/users/signup/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, email, password }),
@@ -17,7 +17,7 @@ export async function signup(username: string, email: string, password: string) 
 }
 
 export async function login(email: string, password: string) {
-  const res = await fetch(`${BASE_URL}/api/users/login/`, {
+  const res = await fetch(`${BACKEND_URL}/api/users/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
