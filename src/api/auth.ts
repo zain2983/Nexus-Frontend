@@ -2,12 +2,12 @@
 
 import { BACKEND_URL } from '../config';
 
-
-export async function signup(username: string, email: string, password: string) {
+const role = "BASIC";
+export async function signup(username: string, name: string, email: string, password: string, password2: string) {
   const res = await fetch(`${BACKEND_URL}/api/users/signup/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({ username, name, email, password, password2 , role}),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -16,11 +16,15 @@ export async function signup(username: string, email: string, password: string) 
   return data;
 }
 
-export async function login(email: string, password: string) {
+export async function login(loginValue: string, password: string) {
   const res = await fetch(`${BACKEND_URL}/api/users/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({
+      username: loginValue,
+      login: loginValue,
+      password,
+    }),
   });
   const data = await res.json();
   if (!res.ok) {

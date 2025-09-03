@@ -15,9 +15,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
+    login: '',
+    username: '',
     email: '',
+    name: '',
     password: '',
-    name: ''
+    password2: ''
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,9 +37,20 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
     setError(null);
 
     if (!isLogin) {
+      // SIGNUP
+      if (formData.password !== formData.password2) {
+        setError("Passwords do not match");
+        return;
+      }
       setLoading(true);
       try {
-        await signup(formData.name, formData.email, formData.password);
+        await signup(
+          formData.username,
+          formData.name,
+          formData.email,
+          formData.password,
+          formData.password2
+        );
         dispatch(login(formData.name)); // Store username on signup
         navigate('/success');
       } catch (err: any) {
@@ -45,10 +59,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         setLoading(false);
       }
     } else {
+      // LOGIN
       setLoading(true);
       try {
-        const res = await loginApi(formData.email, formData.password); // res now contains username
-        dispatch(login(res.username)); // Store username from backend response
+        const res = await loginApi(formData.login, formData.password); // res contains username from backend
+        dispatch(login(res.name)); // Store username from backend response
         navigate('/success');
       } catch (err: any) {
         setError(err.message);
@@ -69,31 +84,52 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
   return (
     <div className="w-full max-w-sm bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
       <h1 className="text-2xl font-bold mb-8 text-center text-white">
-        {isLogin ? 'Login' : 'Join Waitlist'}
+        {isLogin ? 'Login' : 'Sign Up'}
       </h1>
       {error && (
         <div className="mb-4 text-red-400 text-center">{error}</div>
       )}
       <form onSubmit={handleSubmit} className="space-y-6">
         {!isLogin && (
-          <Input
-            type="text"
-            name="name"
-            placeholder="Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
+          <>
+            <Input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+            <Input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+            <Input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+          </>
         )}
         <Input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
+          type="text"
+          name="login"
+          placeholder="Email or Username"
+          value={formData.login}
           onChange={handleChange}
-          required
-          disabled={loading}
+          required={isLogin}
+          disabled={loading || !isLogin}
+          hidden={!isLogin}
         />
         <Input
           type="password"
@@ -104,8 +140,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           required
           disabled={loading}
         />
+        {!isLogin && (
+          <Input
+            type="password"
+            name="password2"
+            placeholder="Confirm Password"
+            value={formData.password2}
+            onChange={handleChange}
+            required
+            disabled={loading}
+          />
+        )}
         <Button type="submit" className="w-full py-3 text-lg" disabled={loading}>
-          {loading ? 'Processing...' : isLogin ? 'Login' : 'Join Waitlist'}
+          {loading ? 'Processing...' : isLogin ? 'Login' : 'Sign Up'}
         </Button>
       </form>
       
