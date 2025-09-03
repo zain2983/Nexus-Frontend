@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
               className="text-gray-300 px-4 py-2 rounded hover:bg-gray-800 transition-colors"
               onClick={() => setShowPopup((prev) => !prev)}
             >
-              Welcome, {username}!
+              Welcome - {username}
             </button>
             {showPopup && (
               <div

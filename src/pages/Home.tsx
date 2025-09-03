@@ -1,6 +1,6 @@
 import React from 'react';
 import LandingPage from '../components/LandingPage';
-import Questions from '../components/Questions';
+// import Questions from '../components/Questions';
 import Navbar from '../components/Navbar';
 
 const Home: React.FC = () => {

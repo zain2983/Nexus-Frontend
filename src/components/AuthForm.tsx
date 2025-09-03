@@ -52,7 +52,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           formData.password2
         );
         dispatch(login(formData.name)); // Store username on signup
-        navigate('/success');
+        navigate('/');
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -64,7 +64,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
       try {
         const res = await loginApi(formData.login, formData.password); // res contains username from backend
         dispatch(login(res.name)); // Store username from backend response
-        navigate('/success');
+        navigate('/');
       } catch (err: any) {
         setError(err.message);
       } finally {
