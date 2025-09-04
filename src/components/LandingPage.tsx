@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaXTwitter, FaLink } from "react-icons/fa6";
 import { getPolls, Poll } from "../api/polls";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 const LandingPage: React.FC = () => {
   const [hoveredOption, setHoveredOption] = useState<{
@@ -13,6 +15,9 @@ const LandingPage: React.FC = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const user = useSelector((state: RootState) => state.user);
+  const isLoggedIn = Boolean(user && user.username);
 
   useEffect(() => {
     getPolls()
@@ -71,66 +76,70 @@ const LandingPage: React.FC = () => {
         </div>
 
         {/* Polls Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-          {polls.map((poll, idx) => {
-            const totalVotes = poll.choices.reduce(
-              (sum, c) => sum + c.votes_count,
-              0
-            );
+        {polls.length === 0 ? (
+          <div className="text-center text-gray-400">
+            No polls available at the moment.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+            {polls.map((poll, idx) => {
+              const totalVotes = poll.choices.reduce(
+                (sum, c) => sum + c.votes_count,
+                0
+              );
 
-            return (
-              <div
-                key={poll.poll_id}
-                className="relative bg-gray-800 rounded-xl shadow-xl p-8 border border-purple-900 transform transition-all duration-300 hover:scale-[1.02]"
-              >
-                <h2 className="text-2xl font-bold text-white mb-6 text-center">
-                  {poll.question}
-                </h2>
+              return (
+                <div
+                  key={poll.poll_id}
+                  className="relative bg-gray-800 rounded-xl shadow-xl p-8 border border-purple-900 transform transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                    {poll.question}
+                  </h2>
 
-                <div className="space-y-6">
-                  {poll.choices.map((choice, choiceIdx) => {
-                    const percentage = calculatePercentage(
-                      choice.votes_count,
-                      totalVotes
-                    );
+                  <div className="space-y-6">
+                    {poll.choices.map((choice, choiceIdx) => {
+                      const percentage = calculatePercentage(
+                        choice.votes_count,
+                        totalVotes
+                      );
+                      const isHovered =
+                        hoveredOption?.cardIndex === idx &&
+                        hoveredOption?.option === choiceIdx;
 
-                    return (
-                      <div
-                        key={choice.choice_id}
-                        className="relative"
-                        onMouseEnter={() =>
-                          setHoveredOption({ cardIndex: idx, option: choiceIdx })
-                        }
-                        onMouseLeave={() => setHoveredOption(null)}
-                      >
+                      return (
                         <div
-                          className={`relative w-full h-12 bg-purple-500/20 rounded-full overflow-hidden transition-all duration-300 ${
-                            hoveredOption?.cardIndex === idx &&
-                            hoveredOption?.option === choiceIdx
-                              ? "blur-[5px]"
-                              : ""
-                          }`}
+                          key={choice.choice_id}
+                          className="relative"
+                          onMouseEnter={() =>
+                            setHoveredOption({ cardIndex: idx, option: choiceIdx })
+                          }
+                          onMouseLeave={() => setHoveredOption(null)}
                         >
-                          {/* Progress Fill */}
                           <div
-                            className="absolute right-0 top-0 h-full bg-purple-500 transition-all duration-300"
-                            style={{ width: `${percentage}%` }}
-                          />
+                            className={`relative w-full h-12 bg-purple-500/20 rounded-full overflow-hidden transition-all duration-300 ${
+                              isHovered && !isLoggedIn ? "blur-[5px]" : ""
+                            }`}
+                          >
+                            {/* Progress Fill */}
+                            <div
+                              className="absolute right-0 top-0 h-full bg-purple-500 transition-all duration-300"
+                              style={{ width: `${percentage}%` }}
+                            />
 
-                          {/* Content Layer */}
-                          <div className="absolute inset-0 flex items-center justify-between px-6 z-10">
-                            <span className="text-white font-medium">
-                              {choice.text}
-                            </span>
-                            <span className="text-white font-medium">
-                              {percentage}%
-                            </span>
+                            {/* Content Layer */}
+                            <div className="absolute inset-0 flex items-center justify-between px-6 z-10">
+                              <span className="text-white font-medium">
+                                {choice.text}
+                              </span>
+                              <span className="text-white font-medium">
+                                {percentage}%
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Login Overlay */}
-                        {hoveredOption?.cardIndex === idx &&
-                          hoveredOption?.option === choiceIdx && (
+                          {/* Login Overlay */}
+                          {!isLoggedIn && isHovered && (
                             <div className="absolute inset-0 flex items-center justify-center bg-gray-900/10 rounded-full">
                               <Link
                                 to="/auth/login"
@@ -140,40 +149,41 @@ const LandingPage: React.FC = () => {
                               </Link>
                             </div>
                           )}
-                      </div>
-                    );
-                  })}
-                </div>
+                        </div>
+                      );
+                    })}
+                  </div>
 
-                <div className="mt-4 text-sm text-gray-400 text-center">
-                  {totalVotes.toLocaleString()} total votes
-                </div>
+                  <div className="mt-4 text-sm text-gray-400 text-center">
+                    {totalVotes.toLocaleString()} total votes
+                  </div>
 
-                {/* Share Buttons */}
-                <div className="absolute bottom-4 right-4 flex space-x-2">
-                  <button
-                    onClick={() =>
-                      handleShare(poll.question, "twitter", poll.poll_id)
-                    }
-                    className="p-2 text-gray-300 hover:text-purple-400 transition-colors"
-                    title="Share on X (Twitter)"
-                  >
-                    <FaXTwitter size={20} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleShare(poll.question, "copy", poll.poll_id)
-                    }
-                    className="p-2 text-gray-300 hover:text-purple-400 transition-colors"
-                    title="Copy Link"
-                  >
-                    <FaLink size={20} />
-                  </button>
+                  {/* Share Buttons */}
+                  <div className="absolute bottom-4 right-4 flex space-x-2">
+                    <button
+                      onClick={() =>
+                        handleShare(poll.question, "twitter", poll.poll_id)
+                      }
+                      className="p-2 text-gray-300 hover:text-purple-400 transition-colors"
+                      title="Share on X (Twitter)"
+                    >
+                      <FaXTwitter size={20} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleShare(poll.question, "copy", poll.poll_id)
+                      }
+                      className="p-2 text-gray-300 hover:text-purple-400 transition-colors"
+                      title="Copy Link"
+                    >
+                      <FaLink size={20} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

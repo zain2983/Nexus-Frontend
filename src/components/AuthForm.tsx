@@ -51,7 +51,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           formData.password,
           formData.password2
         );
-        dispatch(login(formData.name)); // Store username on signup
+        dispatch(login(formData.name)); 
         navigate('/');
       } catch (err: any) {
         setError(err.message);
