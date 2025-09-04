@@ -37,7 +37,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
     setError(null);
 
     if (!isLogin) {
-      // SIGNUP
+      // ====================================
+      // ========== Sign up  ================
+      // ====================================
       if (formData.password !== formData.password2) {
         setError("Passwords do not match");
         return;
@@ -51,7 +53,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           formData.password,
           formData.password2
         );
-        dispatch(login(formData.name)); 
+        const res = await loginApi(formData.username, formData.password); 
+        dispatch(login({ username: res.name, token: res.access }));
         navigate('/');
       } catch (err: any) {
         setError(err.message);
@@ -59,11 +62,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         setLoading(false);
       }
     } else {
-      // LOGIN
+      // ====================================
+      // ========== LOGIN ===================
+      // ====================================
+
       setLoading(true);
       try {
-        const res = await loginApi(formData.login, formData.password); // res contains username from backend
-        dispatch(login(res.name)); // Store username from backend response
+        const res = await loginApi(formData.login, formData.password);
+        dispatch(login({ username: res.name, token: res.access }));
         navigate('/');
       } catch (err: any) {
         setError(err.message);
@@ -155,7 +161,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           {loading ? 'Processing...' : isLogin ? 'Login' : 'Sign Up'}
         </Button>
       </form>
-      
+
       <p className="text-center mt-6 text-sm text-gray-400">
         {isLogin ? "Don't have an account?" : 'Already have an account?'}
         <button

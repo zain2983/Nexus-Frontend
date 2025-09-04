@@ -5,6 +5,7 @@ import { FaXTwitter, FaLink } from "react-icons/fa6";
 import { getPolls, Poll } from "../api/polls";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import { castVote } from "../api/vote";
 
 const LandingPage: React.FC = () => {
   const [hoveredOption, setHoveredOption] = useState<{
@@ -48,6 +49,30 @@ const LandingPage: React.FC = () => {
       navigator.clipboard.writeText(pollUrl);
     }
   };
+
+  const handleVote = async (pollId: number, choiceId: number) => {
+    if (!user?.token) return;
+    try {
+      await castVote(user.token, pollId, choiceId);
+      setPolls((prevPolls) =>
+        prevPolls.map((p) =>
+          p.poll_id === pollId
+            ? {
+              ...p,
+              choices: p.choices.map((c) =>
+                c.choice_id === choiceId
+                  ? { ...c, votes_count: c.votes_count + 1 }
+                  : c
+              ),
+            }
+            : p
+        )
+      );
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -110,16 +135,17 @@ const LandingPage: React.FC = () => {
                       return (
                         <div
                           key={choice.choice_id}
-                          className="relative"
+                          className="relative cursor-pointer" // ⬅️ add cursor-pointer
                           onMouseEnter={() =>
                             setHoveredOption({ cardIndex: idx, option: choiceIdx })
                           }
                           onMouseLeave={() => setHoveredOption(null)}
+                          onClick={() => isLoggedIn && handleVote(poll.poll_id, choice.choice_id)} // ⬅️ new
                         >
+
                           <div
-                            className={`relative w-full h-12 bg-purple-500/20 rounded-full overflow-hidden transition-all duration-300 ${
-                              isHovered && !isLoggedIn ? "blur-[5px]" : ""
-                            }`}
+                            className={`relative w-full h-12 bg-purple-500/20 rounded-full overflow-hidden transition-all duration-300 ${isHovered && !isLoggedIn ? "blur-[5px]" : ""
+                              }`}
                           >
                             {/* Progress Fill */}
                             <div
