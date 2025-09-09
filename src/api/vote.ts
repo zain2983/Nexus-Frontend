@@ -22,12 +22,24 @@ export async function castVote(
     body: JSON.stringify(payload),
   });
 
+  const data = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(
-      errorData?.detail || "Failed to cast vote. Please try again."
-    );
+    let errorMessage = "Failed to cast vote. Please try again.";
+
+    if (data?.detail) {
+      errorMessage = data.detail;
+    } else if (data?.non_field_errors?.length) {
+      errorMessage = data.non_field_errors[0];
+    } else {
+      const firstVal = Object.values(data)[0];
+      if (Array.isArray(firstVal) && firstVal.length > 0) {
+        errorMessage = firstVal[0];
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
-  return res.json(); // return updated vote object from backend
+  return data; // return updated vote object from backend
 }
