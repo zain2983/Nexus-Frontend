@@ -1,5 +1,6 @@
 // api/vote.ts
 import { BACKEND_URL } from "../config";
+import toast from "react-hot-toast";
 
 interface VotePayload {
   poll: number;
@@ -38,8 +39,10 @@ export async function castVote(
       }
     }
 
-    throw new Error(errorMessage);
+    toast.error(errorMessage);
+    return null; // stop execution but prevent crash
   }
-
+  
+  toast.success("Vote cast successfully!");
   return data; // return updated vote object from backend
 }

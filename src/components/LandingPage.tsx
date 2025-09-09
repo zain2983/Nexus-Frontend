@@ -53,25 +53,16 @@ const LandingPage: React.FC = () => {
   const handleVote = async (pollId: number, choiceId: number) => {
     if (!user?.token) return;
     try {
-      await castVote(user.token, pollId, choiceId);
-      setPolls((prevPolls) =>
-        prevPolls.map((p) =>
-          p.poll_id === pollId
-            ? {
-              ...p,
-              choices: p.choices.map((c) =>
-                c.choice_id === choiceId
-                  ? { ...c, votes_count: c.votes_count + 1 }
-                  : c
-              ),
-            }
-            : p
-        )
-      );
-    } catch (err: any) {
-      alert(err.message);
+      const result = await castVote(user.token, pollId, choiceId);
+      if (result) {
+        const updatedPolls = await getPolls();
+        setPolls(updatedPolls);
+      }
+    } catch (err) {
+      // errors are already handled in castVote with toast
     }
   };
+
 
 
   if (loading) {
