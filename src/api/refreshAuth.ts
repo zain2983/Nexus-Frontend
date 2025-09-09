@@ -2,10 +2,11 @@
 // import { store } from "./store/store";
 import store from "../store";
 import { setAccessToken, logout } from "../store/userSlice";
+import { BACKEND_URL } from '../config';
 
 export async function refreshAuth() {
   try {
-    const res = await fetch("http://localhost:8000/api/users/token/refresh/", {
+    const res = await fetch(`${BACKEND_URL}/api/users/token/refresh/`, {
       method: "POST",
       credentials: "include", // 🔑 send HTTP-only cookie automatically
     });
