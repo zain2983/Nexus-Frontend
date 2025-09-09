@@ -81,129 +81,126 @@ const LandingPage: React.FC = () => {
     );
   }
 
-  return (
-    <div className="relative overflow-hidden py-12 bg-gray-900 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
-            <span className="block">Would You Rather</span>
-          </h1>
-        </div>
 
-        {/* Polls Grid */}
-        {polls.length === 0 ? (
-          <div className="text-center text-gray-400">
-            No polls available at the moment.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-            {polls.map((poll, idx) => {
-              const totalVotes = poll.choices.reduce(
-                (sum, c) => sum + c.votes_count,
-                0
-              );
 
-              return (
-                <div
-                  key={poll.poll_id}
-                  className="relative bg-gray-800 rounded-xl shadow-xl p-8 border border-purple-900 transform transition-all duration-300 hover:scale-[1.02]"
-                >
-                  <h2 className="text-2xl font-bold text-white mb-6 text-center">
-                    {poll.question}
-                  </h2>
-
-                  <div className="space-y-6">
-                    {poll.choices.map((choice, choiceIdx) => {
-                      const percentage = calculatePercentage(
-                        choice.votes_count,
-                        totalVotes
-                      );
-                      const isHovered =
-                        hoveredOption?.cardIndex === idx &&
-                        hoveredOption?.option === choiceIdx;
-
-                      return (
-                        <div
-                          key={choice.choice_id}
-                          className="relative cursor-pointer" // ⬅️ add cursor-pointer
-                          onMouseEnter={() =>
-                            setHoveredOption({ cardIndex: idx, option: choiceIdx })
-                          }
-                          onMouseLeave={() => setHoveredOption(null)}
-                          onClick={() => isLoggedIn && handleVote(poll.poll_id, choice.choice_id)} // ⬅️ new
-                        >
-
-                          <div
-                            className={`relative w-full h-12 bg-purple-500/20 rounded-full overflow-hidden transition-all duration-300 ${isHovered && !isLoggedIn ? "blur-[5px]" : ""
-                              }`}
-                          >
-                            {/* Progress Fill */}
-                            <div
-                              className="absolute right-0 top-0 h-full bg-purple-500 transition-all duration-300"
-                              style={{ width: `${percentage}%` }}
-                            />
-
-                            {/* Content Layer */}
-                            <div className="absolute inset-0 flex items-center justify-between px-6 z-10">
-                              <span className="text-white font-medium">
-                                {choice.text}
-                              </span>
-                              <span className="text-white font-medium">
-                                {percentage}%
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Login Overlay */}
-                          {!isLoggedIn && isHovered && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900/10 rounded-full">
-                              <Link
-                                to="/auth/login"
-                                className="px-6 py-2 rounded-lg text-white font-medium transition-all duration-200 hover:scale-105"
-                              >
-                                Login/Signup to Vote
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-4 text-sm text-gray-400 text-center">
-                    {totalVotes.toLocaleString()} total votes
-                  </div>
-
-                  {/* Share Buttons */}
-                  <div className="absolute bottom-4 right-4 flex space-x-2">
-                    <button
-                      onClick={() =>
-                        handleShare(poll.question, "twitter", poll.poll_id)
-                      }
-                      className="p-2 text-gray-300 hover:text-purple-400 transition-colors"
-                      title="Share on X (Twitter)"
-                    >
-                      <FaXTwitter size={20} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleShare(poll.question, "copy", poll.poll_id)
-                      }
-                      className="p-2 text-gray-300 hover:text-purple-400 transition-colors"
-                      title="Copy Link"
-                    >
-                      <FaLink size={20} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+return (
+  <div className="min-h-screen bg-gray-950 py-12">
+    <div className="max-w-7xl mx-auto px-4">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-white">Would You Rather</h1>
+        <p className="mt-2 text-gray-400">Vote and see what others think</p>
       </div>
+
+      {/* Polls Grid */}
+      {polls.length === 0 ? (
+        <div className="text-center text-gray-500">No polls available.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {polls.map((poll, idx) => {
+            const totalVotes = poll.choices.reduce(
+              (sum, c) => sum + c.votes_count,
+              0
+            );
+
+            return (
+              <div
+                key={poll.poll_id}
+                className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col justify-between"
+              >
+                <h2 className="text-lg font-semibold text-white text-center mb-6">
+                  {poll.question}
+                </h2>
+
+                <div className="space-y-4 flex-1">
+                  {poll.choices.map((choice, choiceIdx) => {
+                    const percentage = calculatePercentage(
+                      choice.votes_count,
+                      totalVotes
+                    );
+                    const isHovered =
+                      hoveredOption?.cardIndex === idx &&
+                      hoveredOption?.option === choiceIdx;
+
+                    return (
+                      <div
+                        key={choice.choice_id}
+                        className={`relative cursor-pointer transition-transform ${
+                          isHovered ? "scale-[1.02]" : ""
+                        }`}
+                        onMouseEnter={() =>
+                          setHoveredOption({ cardIndex: idx, option: choiceIdx })
+                        }
+                        onMouseLeave={() => setHoveredOption(null)}
+                        onClick={() =>
+                          isLoggedIn && handleVote(poll.poll_id, choice.choice_id)
+                        }
+                      >
+                        <div className="relative w-full h-10 bg-gray-800 rounded-lg overflow-hidden">
+                          {/* Progress Fill (right to left) */}
+                          <div
+                            className="absolute right-0 top-0 h-full bg-blue-600 transition-all duration-500 ease-out"
+                            style={{ width: `${percentage}%` }}
+                          />
+
+                          {/* Content */}
+                          <div className="absolute inset-0 flex items-center justify-between px-3 text-sm font-medium text-white">
+                            <span>{choice.text}</span>
+                            <span>{percentage}%</span>
+                          </div>
+                        </div>
+
+                        {/* Login Overlay */}
+                        {!isLoggedIn && isHovered && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
+                            <Link
+                              to="/auth/login"
+                              className="px-3 py-1 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-500"
+                            >
+                              Login to vote
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 text-xs text-gray-500 text-center">
+                  {totalVotes.toLocaleString()} votes
+                </div>
+
+                {/* Share */}
+                <div className="mt-4 flex justify-end space-x-2">
+                  <button
+                    onClick={() =>
+                      handleShare(poll.question, "twitter", poll.poll_id)
+                    }
+                    className="p-2 text-gray-400 hover:text-blue-500"
+                  >
+                    <FaXTwitter size={18} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleShare(poll.question, "copy", poll.poll_id)
+                    }
+                    className="p-2 text-gray-400 hover:text-blue-500"
+                  >
+                    <FaLink size={18} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
+
+
+
+
 };
 
 export default LandingPage;
