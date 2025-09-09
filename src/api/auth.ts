@@ -20,6 +20,7 @@ export async function login(loginValue: string, password: string) {
   const res = await fetch(`${BACKEND_URL}/api/users/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: "include",  // 🔑
     body: JSON.stringify({
       username: loginValue,
       login: loginValue,

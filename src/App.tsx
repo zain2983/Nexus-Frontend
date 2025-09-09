@@ -5,8 +5,21 @@ import store from './store';
 import Home from './pages/Home';
 import Auth from './pages/Auth';
 import Success from './pages/Success';
+import { useEffect } from "react";
+import { refreshAuth } from "./api/refreshAuth";
 
 function App() {
+  useEffect(() => {
+    refreshAuth(); // on load
+
+    const interval = setInterval(() => {
+      refreshAuth(); // every 12 mins
+    }, 12 * 60 * 1000);
+    // console.log("REFRESHED AFTER 1 MIN")
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Provider store={store}>
       <Router>
